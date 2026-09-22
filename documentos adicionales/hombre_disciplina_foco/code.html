@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=JetBrains+Mono:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;background-color:#faf8ff;}body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "tertiary-fixed-dim": "#ffb596", "outline": "#737686", "background": "#faf8ff", "secondary-fixed-dim": "#c3c0ff", "surface": "#faf8ff", "on-tertiary-fixed": "#360f00", "on-error": "#ffffff", "surface-tint": "#0053db", "primary-container": "#2563eb", "surface-container-lowest": "#ffffff", "on-surface": "#131b2e", "on-secondary": "#ffffff", "inverse-primary": "#b4c5ff", "on-tertiary-fixed-variant": "#7d2d00", "tertiary": "#943700", "error-container": "#ffdad6", "on-tertiary-container": "#ffede6", "secondary-container": "#645efb", "secondary": "#4b41e1", "surface-container-highest": "#dae2fd", "surface-bright": "#faf8ff", "surface-container-high": "#e2e7ff", "tertiary-fixed": "#ffdbcd", "on-primary-fixed": "#00174b", "on-secondary-container": "#fffbff", "surface-container-low": "#f2f3ff", "surface-container": "#eaedff", "on-primary-container": "#eeefff", "on-tertiary": "#ffffff", "inverse-on-surface": "#eef0ff", "tertiary-container": "#bc4800", "surface-variant": "#dae2fd", "on-secondary-fixed": "#0f0069", "on-primary": "#ffffff", "on-surface-variant": "#434655", "primary": "#004ac6", "on-primary-fixed-variant": "#003ea8", "on-secondary-fixed-variant": "#3323cc", "secondary-fixed": "#e2dfff", "outline-variant": "#c3c6d7", "inverse-surface": "#283044", "error": "#ba1a1a", "on-background": "#131b2e", "primary-fixed": "#dbe1ff", "on-error-container": "#93000a", "primary-fixed-dim": "#b4c5ff", "surface-dim": "#d2d9f4" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "gutter-mobile": "1rem", "margin-mobile": "1.25rem", "space-sm": "0.5rem", "space-lg": "1.5rem", "margin": "3rem", "gutter": "1.5rem", "space-xs": "0.25rem", "space-xl": "2.5rem", "space-md": "1rem" }, fontFamily: { "headline-lg": ["Geist"], "body-lg": ["Geist"], "label-action": ["Geist"], "headline-sm": ["Geist"], "body-sm": ["Geist"], "body-md": ["Geist"], "label-numeric": ["JetBrains Mono"], "headline-xl-mobile": ["Geist"], "headline-md": ["Geist"], "label-caps": ["Geist"], "display-hero": ["Geist"], "headline-xl": ["Geist"] }, fontSize: { "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "400" }], "label-action": ["14px", { "lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "-0.005em", "fontWeight": "400" }], "label-numeric": ["13px", { "lineHeight": "16px", "letterSpacing": "-0.01em", "fontWeight": "500" }], "headline-xl-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "600" }], "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "label-caps": ["11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "600" }], "display-hero": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.035em", "fontWeight": "700" }], "headline-xl": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }] } } } }</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface font-body-md text-body-md flex flex-col min-h-screen antialiased selection:bg-primary/10"><header class="fixed top-0 inset-x-0 z-50 bg-surface-container-lowest/80 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-margin-mobile flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="FocusHabitual Modern Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1Uw9FNc1Urkq1thpH-_Ik0Fbu7U24qV49T8weSIjFa6r4TiMkqs-9_21HQjecUq_AcgGZZVmE_utk5VU0Sxvjz9U0toYj3I57F7E-4sKll0F3yonTtDHzkzmI_Hl9Jbczf1WVvWG2vfy5ilydhTMMp-2NU2e09MdOkU_Ss1TVl3A-LG_GyKe981oL8sbgT1Tl8cWfu-_9S73g9b_Ngvwvupsy3BTWtSRnXWBRdroTUi4dMQhuh-GIlctC4"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight leading-none">FocusHabitual</span><span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Hombre</span></div></div><div class="flex items-center gap-space-sm"><button aria-label="Buscar o Notificaciones" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined text-[22px]">notifications_none</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-24 bg-surface"><div class="flex flex-col w-full px-margin-mobile pb-space-xl gap-space-lg">
+<!-- Executive Header & Welcome Status -->
+<section class="flex flex-col gap-space-xs pt-space-md">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Lunes, 24 de Mayo</span>
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-primary">
+<span class="inline-block w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-body-sm text-body-sm font-semibold tracking-tight">Rendimiento Óptimo</span>
+</div>
+</div>
+<div class="flex items-baseline justify-between mt-1">
+<h1 class="font-headline-xl-mobile text-headline-xl-mobile text-on-surface tracking-tight">Buenos días, Martín</h1>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">Tu claridad mental guía las decisiones estratégicas de hoy.</p>
+</section>
+<!-- Biblical Wisdom & Principle Card -->
+<section class="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm flex flex-col gap-space-sm relative overflow-hidden">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs text-primary">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<span class="font-label-caps text-label-caps tracking-wider text-primary uppercase font-bold">Principio Rector • Proverbios 16:3</span>
+</div>
+<span class="material-symbols-outlined text-[18px] text-outline-variant">auto_awesome</span>
+</div>
+<p class="font-headline-sm text-headline-sm text-on-surface leading-snug">
+      «Encomienda al Señor tus obras, y tus pensamientos serán afirmados.»
+    </p>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Pilar cognitivo para ejecución limpia</span>
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-low text-primary hover:bg-surface-container-high font-label-action text-label-action transition-all active:scale-95" id="btnReflexionar">
+<span class="material-symbols-outlined text-[16px]">edit_note</span>
+        Reflexionar
+      </button>
+</div>
+</section>
+<!-- Mastery & Sobriety Architecture (NoFap / Autodominio) -->
+<section class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[22px]" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Dominio Personal & Vitalidad</h2>
+</div>
+<span class="font-label-numeric text-label-numeric px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant">Fase 2: Consolidación</span>
+</div>
+<!-- Main Streak Container -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm flex flex-col gap-space-lg">
+<!-- Counter Blocks Grid -->
+<div class="grid grid-cols-4 gap-2 text-center" id="liveCounter">
+<div class="flex flex-col items-center justify-center p-2.5 rounded-xl bg-surface-container-low">
+<span class="font-label-numeric text-[22px] font-bold text-on-surface leading-none" id="valDias">42</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant uppercase mt-1">Días</span>
+</div>
+<div class="flex flex-col items-center justify-center p-2.5 rounded-xl bg-surface-container-low">
+<span class="font-label-numeric text-[22px] font-bold text-on-surface leading-none" id="valHoras">14</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant uppercase mt-1">Horas</span>
+</div>
+<div class="flex flex-col items-center justify-center p-2.5 rounded-xl bg-surface-container-low">
+<span class="font-label-numeric text-[22px] font-bold text-on-surface leading-none" id="valMinutos">36</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant uppercase mt-1">Min</span>
+</div>
+<div class="flex flex-col items-center justify-center p-2.5 rounded-xl bg-surface-container-low">
+<span class="font-label-numeric text-[22px] font-bold text-primary leading-none" id="valSegundos">22</span>
+<span class="font-label-caps text-[10px] text-primary uppercase mt-1">Seg</span>
+</div>
+</div>
+<!-- Linear Milestones Track -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-on-surface font-semibold">Meta de Transmutación Cognitiva</span>
+<span class="font-label-numeric text-label-numeric text-primary font-bold">42 / 90 Días (46.6%)</span>
+</div>
+<div class="w-full h-2.5 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full transition-all duration-700 ease-out" style="width: 46.6%;"></div>
+</div>
+<div class="flex justify-between text-[11px] font-label-caps text-outline">
+<span>Día 0</span>
+<span>Día 45 (Reset Dopamina)</span>
+<span>Día 90 (Maestría)</span>
+</div>
+</div>
+<!-- Urgent Cooling SOS Button -->
+<button class="w-full flex items-center justify-center gap-space-sm py-3 px-4 rounded-xl bg-surface-container-high hover:bg-surface-container text-on-surface transition-transform active:scale-[0.99] font-label-action text-label-action">
+<span class="material-symbols-outlined text-primary text-[20px]">air</span>
+<span>Protocolo de Enfriamiento Inmediato (3 min)</span>
+</button>
+<!-- Earned Badges Showcase -->
+<div class="flex flex-col gap-2.5 pt-2">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant font-semibold">Insignias de Victoria Desbloqueadas</span>
+<div class="grid grid-cols-3 gap-2">
+<div class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-surface-container-low text-center">
+<div class="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="font-headline-sm text-[13px] font-bold leading-tight">7 Días</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Claridad</span>
+</div>
+<div class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-surface-container-low text-center">
+<div class="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="font-headline-sm text-[13px] font-bold leading-tight">14 Días</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Enfoque Puro</span>
+</div>
+<div class="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-surface-container-low text-center">
+<div class="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<span class="font-headline-sm text-[13px] font-bold leading-tight">30 Días</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Fuerza Real</span>
+</div>
+</div>
+</div>
+<!-- Sacred Reasons Accordion/Pillars -->
+<div class="flex flex-col gap-2 pt-2">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant font-semibold">3 Razones Sagradas de Mi Voto</span>
+<span class="material-symbols-outlined text-[16px] text-outline">lock</span>
+</div>
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center gap-3 p-3 rounded-xl bg-surface-container-lowest shadow-sm">
+<span class="font-label-numeric text-[12px] text-primary font-bold">01</span>
+<p class="font-body-md text-body-md text-on-surface font-medium">Preservar mi energía vital para crear empresa de impacto.</p>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-xl bg-surface-container-lowest shadow-sm">
+<span class="font-label-numeric text-[12px] text-primary font-bold">02</span>
+<p class="font-body-md text-body-md text-on-surface font-medium">Mirar a mi futura esposa e hijos con pureza e integridad.</p>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-xl bg-surface-container-lowest shadow-sm">
+<span class="font-label-numeric text-[12px] text-primary font-bold">03</span>
+<p class="font-body-md text-body-md text-on-surface font-medium">Ser gobernante absoluto de mi templo y atención ejecutiva.</p>
+</div>
+</div>
+</div>
+<!-- Relapse Declaration (Controlled & Honorable Action) -->
+<div class="pt-2 flex justify-center">
+<button class="flex items-center gap-1.5 text-on-surface-variant hover:text-error transition-colors font-body-sm text-body-sm py-1.5 px-3 rounded-lg hover:bg-surface-container-low" id="btnRecaida">
+<span class="material-symbols-outlined text-[16px]">restart_alt</span>
+          Declarar Recaída Consciente
+        </button>
+</div>
+</div>
+</section>
+<!-- Polymath Skill Vectors (Deep Cognitive Matrix) -->
+<section class="flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[22px]">psychology</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Vectores Polímata</h2>
+</div>
+<span class="font-body-sm text-body-sm text-primary font-semibold">160 / 195 min hoy</span>
+</div>
+<div class="flex flex-col gap-2.5">
+<!-- Vector 1: Arquitectura de Software -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">terminal</span>
+</div>
+<div>
+<span class="font-headline-sm text-[15px] text-on-surface block leading-tight">Arquitectura de Software</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Sistemas Distribuidos & Algoritmos</span>
+</div>
+</div>
+<span class="font-label-numeric text-label-numeric text-primary font-bold">85 / 90 min</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 94%;"></div>
+</div>
+</div>
+<!-- Vector 2: Microeconomía -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">analytics</span>
+</div>
+<div>
+<span class="font-headline-sm text-[15px] text-on-surface block leading-tight">Microeconomía & Estrategia</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Incentivos y Teoría de Juegos</span>
+</div>
+</div>
+<span class="font-label-numeric text-label-numeric text-primary font-bold">45 / 60 min</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 75%;"></div>
+</div>
+</div>
+<!-- Vector 3: Filosofía -->
+<div class="bg-surface-container-lowest rounded-2xl p-space-md shadow-sm flex flex-col gap-2">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">history_edu</span>
+</div>
+<div>
+<span class="font-headline-sm text-[15px] text-on-surface block leading-tight">Filosofía Clásica & Ética</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Lectura Epicteto y Santo Tomás</span>
+</div>
+</div>
+<span class="font-label-numeric text-label-numeric text-primary font-bold">30 / 45 min</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 66%;"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Executive Action: Focus Pomodoro Launcher -->
+<section class="mt-space-xs">
+<button class="w-full py-4 px-6 rounded-2xl bg-primary text-on-primary shadow-lg hover:shadow-xl transition-all active:scale-[0.985] flex items-center justify-between group">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-[24px]">timer</span>
+</div>
+<div class="flex flex-col text-left">
+<span class="font-headline-sm text-[16px] leading-tight">Iniciar Pomodoro de Foco</span>
+<span class="font-body-sm text-primary-fixed-dim text-[12px]">Bloque ejecutivo de 50 minutos</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[24px] transform group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</section>
+</div>
+<script>
+  // Dynamic Real-time Live Seconds Micro-Incrementation
+  (() => {
+    let seconds = 22;
+    let minutes = 36;
+    let hours = 14;
+    let days = 42;
+
+    const elSec = document.getElementById('valSegundos');
+    const elMin = document.getElementById('valMinutos');
+    const elHor = document.getElementById('valHoras');
+
+    setInterval(() => {
+      seconds++;
+      if (seconds >= 60) {
+        seconds = 0;
+        minutes++;
+        if (minutes >= 60) {
+          minutes = 0;
+          hours++;
+          if (hours >= 24) {
+            hours = 0;
+            days++;
+            const elDays = document.getElementById('valDias');
+            if (elDays) elDays.textContent = days;
+          }
+          if (elHor) elHor.textContent = hours.toString().padStart(2, '0');
+        }
+        if (elMin) elMin.textContent = minutes.toString().padStart(2, '0');
+      }
+      if (elSec) elSec.textContent = seconds.toString().padStart(2, '0');
+    }, 1000);
+
+    const btnReflexionar = document.getElementById('btnReflexionar');
+    if (btnReflexionar) {
+      btnReflexionar.addEventListener('click', () => {
+        btnReflexionar.innerHTML = '<span class="material-symbols-outlined text-[16px]">done</span> Guardado';
+        setTimeout(() => {
+          btnReflexionar.innerHTML = '<span class="material-symbols-outlined text-[16px]">edit_note</span> Reflexionar';
+        }, 2000);
+      });
+    }
+
+    const btnRecaida = document.getElementById('btnRecaida');
+    if (btnRecaida) {
+      btnRecaida.addEventListener('click', () => {
+        const confirmar = confirm("¿Deseas registrar un análisis y reinicio honesto de racha?");
+        if (confirmar) {
+          alert("La honestidad contigo mismo es la base del carácter supremo. Racha lista para recomenzar.");
+        }
+      });
+    }
+  })();
+</script></main><nav class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.03)]" data-active-classes="text-primary font-semibold"><div class="flex justify-around items-center h-16 px-space-xs"><a aria-current="page" class="flex flex-col items-center justify-center gap-0.5 min-w-[70px] h-12 transition-colors text-primary font-semibold" data-path="hombre" href="#"><span class="material-symbols-outlined text-[24px]">fitness_center</span><span class="font-body-sm text-body-sm tracking-tight text-[11px]">Hombre</span></a><a class="flex flex-col items-center justify-center gap-0.5 min-w-[70px] h-12 text-on-surface-variant transition-colors hover:text-on-surface" data-path="mujer" href="#"><span class="material-symbols-outlined text-[24px]">spa</span><span class="font-body-sm text-body-sm tracking-tight text-[11px]">Mujer</span></a><a class="flex flex-col items-center justify-center gap-0.5 min-w-[70px] h-12 text-on-surface-variant transition-colors hover:text-on-surface" data-path="pomodoro" href="#"><span class="material-symbols-outlined text-[24px]">timer</span><span class="font-body-sm text-body-sm tracking-tight text-[11px]">Pomodoro</span></a><a class="flex flex-col items-center justify-center gap-0.5 min-w-[70px] h-12 text-on-surface-variant transition-colors hover:text-on-surface" data-path="herramientas" href="#"><span class="material-symbols-outlined text-[24px]">account_balance_wallet</span><span class="font-body-sm text-body-sm tracking-tight text-[11px]">Herramientas</span></a></div></nav></body></html>
