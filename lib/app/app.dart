@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/security/biometric_gate.dart';
+import '../core/security/discreet_mode.dart';
 import 'di.dart';
 import 'router.dart';
 import 'theme.dart';
@@ -13,14 +15,20 @@ class FocusHabitualApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeModeProvider);
+    final appTitle = ref.watch(discreetAppTitleProvider);
 
     return MaterialApp.router(
-      title: 'FocusHabitual Life',
+      title: appTitle,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
       routerConfig: router,
+      builder: (context, child) {
+        return BiometricGateOverlay(
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
     );
   }
 }

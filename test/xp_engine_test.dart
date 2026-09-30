@@ -3,8 +3,8 @@ import 'package:focus_habitual_life/core/gamification/xp_engine.dart';
 
 void main() {
   group('XpEngine Tests', () {
-    test('calculateLevel matches schema.sql formula: floor(sqrt(xp/100)) + 1', () {
-      expect(XpEngine.calculateLevel(0), equals(1));
+    test('calculateLevel matches formula with level 0 for new users with 0 xp', () {
+      expect(XpEngine.calculateLevel(0), equals(0));
       expect(XpEngine.calculateLevel(50), equals(1));
       expect(XpEngine.calculateLevel(99), equals(1));
       expect(XpEngine.calculateLevel(100), equals(2));
@@ -29,8 +29,9 @@ void main() {
       expect(XpEngine.calculateLevelProgress(250), closeTo(0.5, 0.01));
     });
 
-    test('getLevelTitle returns inspiring polymath titles', () {
-      expect(XpEngine.getLevelTitle(1), contains('Polímata'));
+    test('getLevelTitle returns inspiring titles', () {
+      expect(XpEngine.getLevelTitle(0), contains('Nuevo'));
+      expect(XpEngine.getLevelTitle(1), contains('Disciplina'));
       expect(XpEngine.getLevelTitle(3), contains('Disciplina'));
       expect(XpEngine.getLevelTitle(6), contains('Enfoque'));
     });

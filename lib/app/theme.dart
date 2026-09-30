@@ -35,7 +35,12 @@ class AppTheme {
   static const Color tertiary = Color(0xFF943700);
   static const Color tertiaryContainer = Color(0xFFBC4800);
   static const Color accentGold = Color(0xFFD97706);
+  static const Color accentAmber = Color(0xFFD97706);
   static const Color accentEmerald = Color(0xFF10B981);
+  static const Color accentIndigo = Color(0xFF4B41E1);
+  static const Color accentRose = Color(0xFFE11D48);
+  static const Color accentSky = Color(0xFF0284C7);
+  static const Color success = Color(0xFF10B981);
   static const Color error = Color(0xFFBA1A1A);
 
   // Dark Mode Overrides (for toggle support)
@@ -65,11 +70,12 @@ class AppTheme {
     double fontSize = 11,
     FontWeight fontWeight = FontWeight.w700,
     Color color = onSurfaceVariant,
+    double? letterSpacing,
   }) {
     return GoogleFonts.plusJakartaSans(
       fontSize: fontSize,
       fontWeight: fontWeight,
-      letterSpacing: 1.2,
+      letterSpacing: letterSpacing ?? 1.2,
       color: color,
     );
   }

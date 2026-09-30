@@ -59,9 +59,16 @@ void main() {
         durationMinutes: 25,
         taskTag: 'Investigación',
       );
-
       final newXp = await repo.getUserXp();
       expect(newXp, equals(initialXp + 25));
+    });
+
+    test('getChallenge21Data returns active 21-day challenge with 7 week nodes', () async {
+      final challenge = await repo.getChallenge21Data();
+      expect(challenge, isNotNull);
+      expect(challenge!.habit.category, equals(HabitCategory.challenge21));
+      expect(challenge.weekNodes.length, equals(7));
+      expect(challenge.currentDayNumber, inInclusiveRange(1, 21));
     });
   });
 }

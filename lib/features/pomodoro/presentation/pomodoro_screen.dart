@@ -4,9 +4,18 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../../app/theme.dart';
 import '../../../app/widgets/brand_logo.dart';
+import '../domain/pomodoro_models.dart';
 import 'controllers/pomodoro_controller.dart';
+import 'widgets/ambient_sound_bar.dart';
+import 'widgets/daily_blocks_sheet.dart';
+import 'widgets/interruption_sheet.dart';
+import 'widgets/kinesthetic_break_view.dart';
+import 'widgets/post_session_summary_dialog.dart';
+import 'widgets/startup_checklist_sheet.dart';
 
-/// Full interactive Pomodoro & Deep Work Screen matching pomodoro_deep_work/code.html.
+/// Full interactive Executive Pomodoro & Deep Work Screen.
+/// Implements Bimodal Focus, Deep Work modes, Flowmodoro, Radical Cognitive Decoupling,
+/// Bloc de Descarga (Interruption Sheet), and Natural Ambient Soundscapes.
 class PomodoroScreen extends ConsumerStatefulWidget {
   const PomodoroScreen({super.key});
 
@@ -17,18 +26,56 @@ class PomodoroScreen extends ConsumerStatefulWidget {
 class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
   bool _monkMode = true;
 
-  final List<String> _vectors = [
-    'Arquitectura de Sistemas',
-    'Microeconomía & Finanzas',
-    'Filosofía & Ética',
-    'Inteligencia Artificial',
-    'Estrategia Corporativa',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Listen for session completion to display post-session debrief modal
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkSessionDialogPending();
+    });
+  }
+
+  void _checkSessionDialogPending() {
+    final state = ref.read(pomodoroProvider);
+    if (state.sessionCompletedDialogPending) {
+      PostSessionSummaryDialog.show(context);
+    }
+  }
+
+  void _handleStart(PomodoroState state, PomodoroNotifier notifier) {
+    if (state.status == PomodoroStatus.running) {
+      if (state.mode.isFlowmodoro) {
+        notifier.stopFlowmodoroAndStartBreak();
+      } else {
+        notifier.pause();
+      }
+      return;
+    }
+
+    if (state.status == PomodoroStatus.paused) {
+      notifier.start();
+      return;
+    }
+
+    // Starting new session
+    if (state.workType.isDeepWork && (state.taskObjective == null || state.taskObjective!.isEmpty)) {
+      StartupChecklistSheet.show(context);
+    } else {
+      notifier.start();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(pomodoroProvider);
     final notifier = ref.read(pomodoroProvider.notifier);
+
+    // Auto-trigger dialog if session completes while on screen
+    ref.listen<PomodoroState>(pomodoroProvider, (prev, next) {
+      if (next.sessionCompletedDialogPending && !(prev?.sessionCompletedDialogPending ?? false)) {
+        PostSessionSummaryDialog.show(context);
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -72,18 +119,27 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
                     ],
                   ),
                   const Spacer(),
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: const BoxDecoration(
-                      color: AppTheme.primary,
-                      shape: BoxShape.circle,
+
+                  // Daily Planner Block Template Button
+                  IconButton(
+                    onPressed: () => DailyBlocksSheet.show(context),
+                    icon: const Icon(Icons.calendar_view_day_rounded, size: 22),
+                    color: AppTheme.primary,
+                    tooltip: 'Planificador de Bloques',
+                  ),
+                  const SizedBox(width: 4),
+
+                  // Interruption Notes Quick Access Button
+                  IconButton(
+                    onPressed: () => InterruptionSheet.show(context),
+                    icon: Badge(
+                      isLabelVisible: state.interruptionNotes.isNotEmpty,
+                      label: Text('${state.interruptionNotes.length}'),
+                      backgroundColor: AppTheme.primary,
+                      child: const Icon(Icons.edit_note_rounded, size: 22),
                     ),
-                    child: const Icon(
-                      Icons.person_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
+                    color: AppTheme.onSurfaceVariant,
+                    tooltip: 'Bloc de Descarga',
                   ),
                 ],
               ),
@@ -96,95 +152,228 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // 1. Polymath Vector Selection Ribbon
-            _buildVectorRibbon(state, notifier),
-            const SizedBox(height: 18),
+            // 1. Bimodal Work Type Selector (Deep Work vs Shallow Work)
+            if (!state.isBreak) ...[
+              _buildBimodalSelector(state, notifier),
+              const SizedBox(height: 14),
 
-            // 2. Central Focus Node & Concentric Chronometer Card
-            _buildCentralChronometerCard(state),
-            const SizedBox(height: 18),
+              // 2. Timer Mode Presets (Classic, Extended, Ultradian, Flowmodoro)
+              _buildModeSelector(state, notifier),
+              const SizedBox(height: 16),
+            ],
 
-            // 3. Primary Chronometer Control Deck
-            _buildControlDeck(state, notifier),
-            const SizedBox(height: 18),
+            // 3. Central Node: Chronometer Card OR Radical Cognitive Decoupling Break View
+            if (state.isBreak)
+              const KinestheticBreakView()
+            else
+              _buildCentralChronometerCard(state, notifier),
+            const SizedBox(height: 16),
 
-            // 4. Mode Presets Selector (Focus 25, Break 5, Long Break 15)
-            _buildModePresets(state, notifier),
+            // 4. Ambient Natural Soundscape Bar
+            const AmbientSoundBar(),
+            const SizedBox(height: 16),
+
+            // 5. Primary Control Deck
+            if (!state.isBreak) ...[
+              _buildControlDeck(state, notifier),
+              const SizedBox(height: 16),
+            ],
+
+            // 6. Monk Mode & DND status banner
+            _buildMonkModeCard(state, notifier),
             const SizedBox(height: 24),
+          ],
+        ),
+      ),
+      floatingActionButton: (!state.isBreak && state.status == PomodoroStatus.running)
+          ? FloatingActionButton.extended(
+              onPressed: () => InterruptionSheet.show(context),
+              backgroundColor: AppTheme.surfaceContainerLowest,
+              foregroundColor: AppTheme.primary,
+              icon: Badge(
+                isLabelVisible: state.interruptionNotes.isNotEmpty,
+                label: Text('${state.interruptionNotes.length}'),
+                backgroundColor: AppTheme.primary,
+                child: const Icon(Icons.edit_note_rounded),
+              ),
+              label: Text(
+                'Bloc de Descarga',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.onSurface,
+                ),
+              ),
+            )
+          : null,
+    );
+  }
+
+  /// Bimodal selector between Deep Work and Shallow Work.
+  Widget _buildBimodalSelector(PomodoroState state, PomodoroNotifier notifier) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppTheme.outlineVariant),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _buildBimodalTab(
+              title: 'Deep Work',
+              subtitle: '1.5x XP • Enfoque Nuclear',
+              icon: Icons.psychology_rounded,
+              isSelected: state.workType == WorkType.deepWork,
+              onTap: () => notifier.setWorkType(WorkType.deepWork),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: _buildBimodalTab(
+              title: 'Shallow Work',
+              subtitle: '1.0x XP • Mantenimiento',
+              icon: Icons.task_alt_rounded,
+              isSelected: state.workType == WorkType.shallowWork,
+              onTap: () => notifier.setWorkType(WorkType.shallowWork),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBimodalTab({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.surfaceContainer : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: isSelected ? AppTheme.primary : AppTheme.onSurfaceVariant,
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                      color: isSelected ? AppTheme.primary : AppTheme.onSurface,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 9,
+                      color: AppTheme.onSurfaceVariant,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildVectorRibbon(PomodoroState state, PomodoroNotifier notifier) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'VECTOR POLÍMATA ACTIVO',
-              style: AppTheme.labelCaps(fontSize: 11, color: AppTheme.onSurfaceVariant),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: AppTheme.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                'Nivel IV • 84%',
-                style: AppTheme.numeric(fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.primary),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
+  /// 4-mode timer preset switcher.
+  Widget _buildModeSelector(PomodoroState state, PomodoroNotifier notifier) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: PomodoroTimerMode.values.map((mode) {
+          final isSelected = state.mode == mode;
+          final isRunning = state.status == PomodoroStatus.running;
 
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: _vectors.map((vec) {
-              final isSelected = state.selectedTag == vec;
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: ChoiceChip(
-                  avatar: Icon(
-                    Icons.account_tree_outlined,
-                    size: 15,
-                    color: isSelected ? Colors.white : AppTheme.onSurfaceVariant,
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ChoiceChip(
+              showCheckmark: false,
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    mode.name,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 12,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      color: isSelected ? Colors.white : AppTheme.onSurfaceVariant,
+                    ),
                   ),
-                  label: Text(vec),
-                  selected: isSelected,
-                  onSelected: (_) => notifier.setTag(vec),
-                  selectedColor: AppTheme.primary,
-                  backgroundColor: AppTheme.surfaceContainerLowest,
-                  labelStyle: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: isSelected ? Colors.white : AppTheme.onSurfaceVariant,
-                  ),
-                  side: BorderSide(
-                    color: isSelected ? AppTheme.primary : AppTheme.outlineVariant,
-                  ),
+                  if (mode.suggestedDailyCap != null) ...[
+                    const SizedBox(width: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? Colors.white.withValues(alpha: 0.2)
+                            : AppTheme.surfaceContainerHigh,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        'Máx ${mode.suggestedDailyCap}/d',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
+                          color: isSelected ? Colors.white : AppTheme.outline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              selected: isSelected,
+              selectedColor: AppTheme.primary,
+              backgroundColor: AppTheme.surfaceContainerLowest,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(
+                  color: isSelected ? AppTheme.primary : AppTheme.outlineVariant,
                 ),
-              );
-            }).toList(),
-          ),
-        ),
-      ],
+              ),
+              onSelected: isRunning ? null : (selected) {
+                if (selected) notifier.setMode(mode);
+              },
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 
-  Widget _buildCentralChronometerCard(PomodoroState state) {
+  /// Concentric chronometer dial and cycle node.
+  Widget _buildCentralChronometerCard(PomodoroState state, PomodoroNotifier notifier) {
+    final isFlowmodoro = state.mode.isFlowmodoro;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Cycle & State Metadata
+            // Cycle & Telemetry Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -199,14 +388,14 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
                       Container(
                         width: 7,
                         height: 7,
-                        decoration: const BoxDecoration(
-                          color: AppTheme.primary,
+                        decoration: BoxDecoration(
+                          color: state.workType.isDeepWork ? AppTheme.primary : AppTheme.accentEmerald,
                           shape: BoxShape.circle,
                         ),
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Ciclo 2 de 4',
+                        'Sesión ${state.completedSessionsToday + 1}',
                         style: AppTheme.labelCaps(fontSize: 10, color: AppTheme.onSurfaceVariant),
                       ),
                     ],
@@ -217,7 +406,7 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
                     const Icon(Icons.bolt_rounded, size: 16, color: AppTheme.primary),
                     const SizedBox(width: 4),
                     Text(
-                      '92% Eficiencia',
+                      state.workType.isDeepWork ? '+38 XP Deep Work' : '+25 XP Standard',
                       style: AppTheme.numeric(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -228,7 +417,7 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
             // Concentric Chronometer Dial
             Stack(
@@ -238,11 +427,13 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
                   width: 230,
                   height: 230,
                   child: CircularProgressIndicator(
-                    value: state.progress,
+                    value: isFlowmodoro
+                        ? (state.status == PomodoroStatus.running ? state.progress : 1.0)
+                        : state.progress,
                     strokeWidth: 8,
                     backgroundColor: AppTheme.surfaceContainerHigh,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      state.mode == PomodoroMode.focus ? AppTheme.primary : AppTheme.accentEmerald,
+                      state.workType.isDeepWork ? AppTheme.primary : AppTheme.accentEmerald,
                     ),
                   ),
                 ),
@@ -250,8 +441,13 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'DEEP WORK',
-                      style: AppTheme.labelCaps(fontSize: 10, color: AppTheme.onSurfaceVariant),
+                      isFlowmodoro
+                          ? 'FLOWTIME ASCENDENTE'
+                          : (state.workType.isDeepWork ? 'DEEP WORK' : 'SHALLOW WORK'),
+                      style: AppTheme.labelCaps(
+                        fontSize: 10,
+                        color: state.workType.isDeepWork ? AppTheme.primary : AppTheme.accentEmerald,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -264,85 +460,81 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: AppTheme.surfaceContainer,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.track_changes_rounded, size: 12, color: AppTheme.primary),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Sprints de 50m',
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.onSurface,
+
+                    // Tag and mode label
+                    GestureDetector(
+                      onTap: () => _showTagPicker(context, notifier, state.selectedTag),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppTheme.surfaceContainer,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppTheme.outlineVariant.withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.label_rounded, size: 12, color: AppTheme.primary),
+                            const SizedBox(width: 4),
+                            Text(
+                              state.selectedTag,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.onSurface,
+                              ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 4),
+                            const Icon(Icons.arrow_drop_down, size: 14, color: AppTheme.outline),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 18),
 
-            // Monk Mode Toggle
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppTheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(12),
+            // Active Objective Banner (if set from checklist)
+            if (state.taskObjective != null && state.taskObjective!.isNotEmpty) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppTheme.primary.withValues(alpha: 0.2)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.flag_rounded, size: 16, color: AppTheme.primary),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        state.taskObjective!,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.onSurface,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: AppTheme.surfaceContainerLowest,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.do_not_disturb_on_rounded,
-                      color: AppTheme.primary,
-                      size: 18,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Modo Monje Total',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.onSurface,
-                          ),
-                        ),
-                        Text(
-                          'Silencia llamadas y bloquea distracciones',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11,
-                            color: AppTheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Switch(
-                    value: _monkMode,
-                    activeThumbColor: AppTheme.primary,
-                    onChanged: (val) => setState(() => _monkMode = val),
-                  ),
-                ],
+              const SizedBox(height: 8),
+            ],
+
+            // Flowmodoro Tip / Mode Description
+            Text(
+              state.mode.description,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                color: AppTheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -351,22 +543,31 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
     );
   }
 
+  /// Primary control deck with Start/Pause/Reset.
   Widget _buildControlDeck(PomodoroState state, PomodoroNotifier notifier) {
+    final isRunning = state.status == PomodoroStatus.running;
+    final isPaused = state.status == PomodoroStatus.paused;
+    final isFlowmodoro = state.mode.isFlowmodoro;
+
     return Row(
       children: [
-        // Main Primary Cobalt Action Button
+        // Main Action Button
         Expanded(
           flex: 3,
           child: SizedBox(
             height: 52,
             child: ElevatedButton.icon(
-              onPressed: state.status == PomodoroStatus.running ? notifier.pause : notifier.start,
+              onPressed: () => _handleStart(state, notifier),
               icon: Icon(
-                state.status == PomodoroStatus.running ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                isRunning
+                    ? (isFlowmodoro ? Icons.stop_circle_rounded : Icons.pause_rounded)
+                    : Icons.play_arrow_rounded,
                 size: 24,
               ),
               label: Text(
-                state.status == PomodoroStatus.running ? 'Pausar' : 'Iniciar Enfoque',
+                isRunning
+                    ? (isFlowmodoro ? 'Terminar y Descansar' : 'Pausar')
+                    : (isPaused ? 'Reanudar' : 'Iniciar Enfoque'),
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
@@ -382,74 +583,159 @@ class _PomodoroScreenState extends ConsumerState<PomodoroScreen> {
         ),
         const SizedBox(width: 10),
 
-        // Pause / Secondary Button
-        SizedBox(
-          height: 52,
-          child: OutlinedButton(
-            onPressed: state.status == PomodoroStatus.running ? notifier.pause : null,
-            style: OutlinedButton.styleFrom(
-              backgroundColor: AppTheme.surfaceContainerLowest,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        // Checklist Button (if idle and deep work) OR Secondary Pause
+        if (!isRunning && !isPaused && state.workType.isDeepWork)
+          SizedBox(
+            height: 52,
+            child: OutlinedButton.icon(
+              onPressed: () => StartupChecklistSheet.show(context),
+              icon: const Icon(Icons.checklist_rounded, size: 20),
+              label: const Text('Checklist'),
+              style: OutlinedButton.styleFrom(
+                backgroundColor: AppTheme.surfaceContainerLowest,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
             ),
-            child: const Text('Pausa'),
-          ),
-        ),
-        const SizedBox(width: 10),
-
-        // Reset Button
-        SizedBox(
-          height: 52,
-          width: 52,
-          child: IconButton.outlined(
-            onPressed: notifier.reset,
-            icon: const Icon(Icons.restart_alt_rounded),
-            color: AppTheme.onSurfaceVariant,
-            style: IconButton.styleFrom(
-              backgroundColor: AppTheme.surfaceContainerLowest,
-              side: const BorderSide(color: AppTheme.outlineVariant),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          )
+        else ...[
+          // Reset Button
+          SizedBox(
+            height: 52,
+            width: 52,
+            child: IconButton.outlined(
+              onPressed: notifier.reset,
+              icon: const Icon(Icons.restart_alt_rounded),
+              color: AppTheme.onSurfaceVariant,
+              style: IconButton.styleFrom(
+                backgroundColor: AppTheme.surfaceContainerLowest,
+                side: const BorderSide(color: AppTheme.outlineVariant),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              tooltip: 'Reiniciar Bloque',
             ),
           ),
-        ),
+        ],
       ],
     );
   }
 
-  Widget _buildModePresets(PomodoroState state, PomodoroNotifier notifier) {
+  /// Monk Mode / DND Card.
+  Widget _buildMonkModeCard(PomodoroState state, PomodoroNotifier notifier) {
     return Container(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLowest,
+        color: AppTheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppTheme.outlineVariant),
       ),
       child: Row(
-        children: PomodoroMode.values.map((mode) {
-          final isSelected = state.mode == mode;
-          return Expanded(
-            child: InkWell(
-              onTap: () => notifier.setMode(mode),
-              borderRadius: BorderRadius.circular(10),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  color: isSelected ? AppTheme.surfaceContainer : Colors.transparent,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  mode.displayName,
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceContainerLowest,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.do_not_disturb_on_rounded,
+              color: AppTheme.primary,
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Modo Monje & Silencio',
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: isSelected ? AppTheme.primary : AppTheme.onSurfaceVariant,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.onSurface,
                   ),
                 ),
-              ),
+                Text(
+                  'Silencia llamadas y bloquea notificaciones externas',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    color: AppTheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ),
-          );
-        }).toList(),
+          ),
+          Switch(
+            value: _monkMode,
+            activeThumbColor: AppTheme.primary,
+            onChanged: (val) {
+              setState(() => _monkMode = val);
+              notifier.toggleDnd(val);
+            },
+          ),
+        ],
       ),
+    );
+  }
+
+  void _showTagPicker(BuildContext context, PomodoroNotifier notifier, String currentTag) {
+    const tags = [
+      'Desarrollo Core',
+      'Arquitectura de Software',
+      'Depuración & Testing',
+      'Estudio Técnico',
+      'Investigación',
+      'Revisión & Commits',
+      'Logística & Tickets',
+    ];
+
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: AppTheme.surfaceContainerLowest,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Selecciona el Vector de Enfoque',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: tags.map((t) {
+                    final isSelected = t == currentTag;
+                    return ActionChip(
+                      label: Text(t),
+                      backgroundColor: isSelected ? AppTheme.primary : AppTheme.surfaceContainerLow,
+                      labelStyle: TextStyle(
+                        color: isSelected ? Colors.white : AppTheme.onSurface,
+                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                      ),
+                      onPressed: () {
+                        notifier.setTag(t);
+                        Navigator.pop(ctx);
+                      },
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

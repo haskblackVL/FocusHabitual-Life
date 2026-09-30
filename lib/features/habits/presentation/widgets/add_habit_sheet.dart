@@ -7,14 +7,22 @@ import '../controllers/habits_controller.dart';
 
 /// Modal bottom sheet for creating a new Habit.
 class AddHabitSheet extends ConsumerStatefulWidget {
-  const AddHabitSheet({super.key});
+  const AddHabitSheet({
+    super.key,
+    this.initialCategory = HabitCategory.general,
+  });
 
-  static Future<void> show(BuildContext context) {
+  final HabitCategory initialCategory;
+
+  static Future<void> show(
+    BuildContext context, {
+    HabitCategory initialCategory = HabitCategory.general,
+  }) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => const AddHabitSheet(),
+      builder: (context) => AddHabitSheet(initialCategory: initialCategory),
     );
   }
 
@@ -25,8 +33,14 @@ class AddHabitSheet extends ConsumerStatefulWidget {
 class _AddHabitSheetState extends ConsumerState<AddHabitSheet> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
-  HabitCategory _selectedCategory = HabitCategory.general;
+  late HabitCategory _selectedCategory;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedCategory = widget.initialCategory;
+  }
 
   @override
   void dispose() {
@@ -148,7 +162,9 @@ class _AddHabitSheetState extends ConsumerState<AddHabitSheet> {
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: HabitCategory.values.map((cat) {
+              children: HabitCategory.values
+                  .where((cat) => cat != HabitCategory.finance && cat != HabitCategory.gratitude)
+                  .map((cat) {
                 final isSelected = _selectedCategory == cat;
                 return ChoiceChip(
                   label: Text(cat.displayName),

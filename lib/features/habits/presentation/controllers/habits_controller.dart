@@ -1,13 +1,44 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../../../core/gamification/gamification_controller.dart';
 import '../../data/habit_repository.dart';
+import '../../domain/challenge_21_data.dart';
 import '../../domain/habit.dart';
+import '../../../wellness/presentation/controllers/wellness_controller.dart';
 
 /// Provider for HabitRepository.
 final habitRepositoryProvider = Provider<HabitRepository>((ref) {
-  return HabitRepository();
+  final user = ref.watch(authControllerProvider).value;
+  return HabitRepository(currentUserId: user?.id);
 });
+
+/// Controller managing the active 21-Day Challenge.
+final challenge21ControllerProvider =
+    AsyncNotifierProvider<Challenge21Controller, Challenge21Data?>(
+  Challenge21Controller.new,
+);
+
+class Challenge21Controller extends AsyncNotifier<Challenge21Data?> {
+  HabitRepository get _repo => ref.read(habitRepositoryProvider);
+
+  @override
+  FutureOr<Challenge21Data?> build() async {
+    ref.watch(habitRepositoryProvider);
+    return _repo.getChallenge21Data();
+  }
+
+  /// Toggles today's completion for the active 21-Day Challenge.
+  Future<void> toggleToday() async {
+    final current = state.value;
+    if (current == null) return;
+
+    await _repo.toggleHabitCompletion(current.habit.id);
+    ref.read(gamificationProvider.notifier).refresh();
+    ref.invalidate(habitsControllerProvider);
+    state = AsyncData(await _repo.getChallenge21Data());
+  }
+}
 
 /// Controller managing the list of active habits and their completion statuses.
 final habitsControllerProvider =
@@ -16,11 +47,11 @@ final habitsControllerProvider =
 );
 
 class HabitsController extends AsyncNotifier<List<HabitWithStatus>> {
-  late final HabitRepository _repo;
+  HabitRepository get _repo => ref.read(habitRepositoryProvider);
 
   @override
   FutureOr<List<HabitWithStatus>> build() async {
-    _repo = ref.watch(habitRepositoryProvider);
+    ref.watch(habitRepositoryProvider);
     return _repo.getHabitsWithStatus();
   }
 
@@ -28,6 +59,12 @@ class HabitsController extends AsyncNotifier<List<HabitWithStatus>> {
   Future<void> toggleHabit(String habitId) async {
     final currentList = state.value;
     if (currentList == null) return;
+
+    final targetHabit = currentList.firstWhere(
+      (item) => item.habit.id == habitId,
+      orElse: () => currentList.first,
+    );
+    final willComplete = !targetHabit.isCompletedToday;
 
     // Optimistic UI update
     state = AsyncData(
@@ -48,8 +85,21 @@ class HabitsController extends AsyncNotifier<List<HabitWithStatus>> {
     // Persist in SQLite
     await _repo.toggleHabitCompletion(habitId);
 
+    // Synchronize hydration if this is a water/hydration habit
+    final lowerTitle = targetHabit.habit.title.toLowerCase();
+    if (lowerTitle.contains('agua') || lowerTitle.contains('water')) {
+      if (willComplete) {
+        ref.read(waterControllerProvider.notifier).logWater(250);
+      } else {
+        ref.read(waterControllerProvider.notifier).undoLastLog();
+      }
+    }
+
     // Refresh gamification (XP and level)
     ref.read(gamificationProvider.notifier).refresh();
+
+    // Invalidate challenge controller if this was a challenge habit
+    ref.invalidate(challenge21ControllerProvider);
 
     // Reload from source to ensure complete consistency
     final updated = await _repo.getHabitsWithStatus();

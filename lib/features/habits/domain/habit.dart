@@ -31,9 +31,9 @@ enum HabitCategory {
       case HabitCategory.challenge21:
         return 'Reto 21 Días';
       case HabitCategory.checklistAm:
-        return 'Rutina Matutina (AM)';
+        return 'Rutina Matutina';
       case HabitCategory.checklistPm:
-        return 'Rutina Nocturna (PM)';
+        return 'Rutina Nocturna';
       case HabitCategory.finance:
         return 'Finanzas';
       case HabitCategory.gratitude:
